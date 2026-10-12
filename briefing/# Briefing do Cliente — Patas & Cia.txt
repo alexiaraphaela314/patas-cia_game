@@ -1,0 +1,12 @@
+# Briefing do Cliente — Patas & Cia
+
+- Cliente: Patas & Cia (pet shop fictício)
+- Produto a lançar: Nova linha de petiscos naturais para pets
+- Público-alvo: Tutores de pets (20 a 40 anos), que usam telemóvel e valorizam a saúde animal
+- Tom da marca: Carinhoso, dinâmico, divertido e focado no bem-estar
+- Paleta de cores obrigatória: 
+  * Verde Botânico (#2E5A44)
+  * Terracota (#C86446)
+  * Bege Natural (#F5EBE1)
+  * Amarelo Petisco (#E5A93C)
+- Entregas exigidas: Mascote, jogo casual para navegador (até 60 segundos), tela final com cupom promocional e conformidade ética (declaração de IA, sem recolha de dados pessoais).

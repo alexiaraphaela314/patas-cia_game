@@ -1,0 +1,16 @@
+# Relatório Final — Advergame Patas & Cia
+
+## 1. Resumo da Campanha
+Jogo casual em HTML5 ("Snack Dash: Escolha Saudável") desenvolvido para o lançamento da nova linha de petiscos naturais da Patas & Cia. Partidas de 45 segundos em 3 faixas.
+
+## 2. Decisões Criativas e Abordagem Técnica
+Para a entrega do protótipo jogável no AI Studio, foi utilizada a abordagem de geração procedural via código (Canvas/SVG) diretamente no modelo Gemini 3.5 Flash Lite. A ficha textual do mascote Nico e a paleta oficial da marca foram inseridas diretamente no prompt mestre, permitindo que a IA renderizasse o jogo completo em um único arquivo HTML5 autônomo e de carregamento instantâneo.
+
+## 3. Integração da Marca
+Nível DEMONSTRATIVO: O produto da marca (petisco natural) atua como power-up no jogo (+100 pontos e Modo Super Vitalidade), demonstrando na prática o benefício da alimentação saudável.
+
+## 4. Chamada para Ação (CTA)
+A tela final exibe o código promocional PETISCONATURAL15 para incentivar a conversão no site/loja física.
+
+## 5. Declaração Ética
+Jogo promocional fictício criado para fins educacionais na disciplina de Modelagem e Animação 3D / IA, respeitando as normas da LGPD e sem coleta de dados pessoais.

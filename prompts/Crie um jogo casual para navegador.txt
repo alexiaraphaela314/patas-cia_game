@@ -1,0 +1,29 @@
+Crie um jogo casual para navegador chamado "Snack Dash: Escolha Saudável", feito para a marca fictícia Patas & Cia.
+Entregue o código completo em um único arquivo HTML5 funcional (HTML + CSS + JavaScript incorporados).
+O jogo deve funcionar perfeitamente em telas de celular (orientação retrato / modo mobile) e computador (controle por toque/swipe, mouse ou setas do teclado).
+DIREÇÃO DE ARTE E DESENHO (Desenhe via código HTML5 Canvas / SVG, com visual de jogo mobile moderno):
+Mascote: Nico, um gato laranja jovem, atlético, com patas brancas, olhos verde botânico (#2E5A44) e bandana verde botânico (#2E5A44) com ícone de folha amarela (#E5A93C).
+Cores da Marca: Verde Botânico #2E5A44, Terracota #C86446, Bege Natural #F5EBE1, Amarelo Petisco #E5A93C.
+Cenário: Pista de parque com fundo em gradiente nas cores da marca e faixas bem definidas.
+MECÂNICA E REGRAS DO JOGO (Duração: 45 segundos):
+TELA INICIAL:
+Título "Snack Dash: Escolha Saudável"
+Logo estilizado da "Patas & Cia"
+Ilustração do Nico no centro
+Texto instrutivo: "Deslize para os lados para pegar os petiscos naturais e evitar os ultraprocessados!"
+Botão "JOGAR" (cor Terracota #C86446)
+GAMEPLAY:
+Nico corre continuamente em 3 faixas verticais.
+O jogador alterna de faixa com Swipe (esquerda/direita), setas do teclado ou clique nas faixas.
+Itens que aparecem nas faixas:
+Petisco Natural Patas & Cia: +100 pontos, efeito de brilho amarelo.
+Super Petisco Estrela: +250 pontos, ativa MODO SUPER VITALIDADE por 5s (pontos em dobro e aura brilhante #E5A93C).
+Obstáculo (Ração Ultraprocessada / Corante): -50 pontos, faz o Nico dar um leve tropeço.
+HUD no topo: Cronômetro regressivo (45s), Placar de Pontos e Barra de Vitalidade.
+TELA FINAL (Conversão / Advergame):
+Placar final e título "Tutor Consciente!"
+Cartão com o Cupom de Desconto: PETISCONATURAL15
+Texto de conversão: "Mostre o código PETISCONATURAL15 no site ou loja Patas & Cia e ganhe 15% de desconto na primeira compra da nova linha natural!"
+Botões "JOGAR DE NOVO" e "COPIAR CUPOM"
+Rodapé obrigatório: "Jogo promocional fictício, criado com auxílio de IA generativa para fins educacionais."
+RESTRIÇÕES: não peça nome, e-mail nem nenhum dado do jogador; não use sons externos; guarde o recorde apenas na memória da sessão.

@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Snack Dash: Escolha Saudável | Patas & Cia</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            color: #2E5A44;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            max-height: 850px;
+            background-color: #F5EBE1;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Telas de Interface (HTML Sobrepostas) */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(245, 235, 225, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+            z-index: 10;
+            transition: opacity 0.3s ease;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Tipografia e Cores */
+        h1 {
+            font-size: 28px;
+            color: #2E5A44;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+
+        .brand {
+            font-size: 14px;
+            color: #C86446;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 15px;
+            color: #4a4a4a;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        /* Botões */
+        .btn {
+            background-color: #C86446;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(200, 100, 70, 0.4);
+            transition: transform 0.1s, background-color 0.2s;
+            width: 100%;
+            max-width: 260px;
+            margin-bottom: 12px;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-secondary {
+            background-color: #2E5A44;
+            box-shadow: 0 4px 15px rgba(46, 90, 68, 0.3);
+        }
+
+        /* Card de Cupom */
+        .coupon-card {
+            background: white;
+            border: 2px dashed #E5A93C;
+            border-radius: 16px;
+            padding: 16px;
+            width: 100%;
+            max-width: 320px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .coupon-code {
+            font-family: monospace;
+            font-size: 20px;
+            font-weight: bold;
+            color: #C86446;
+            background: #F5EBE1;
+            padding: 8px;
+            border-radius: 8px;
+            margin: 8px 0;
+            letter-spacing: 1px;
+        }
+
+        .score-board {
+            font-size: 18px;
+            color: #2E5A44;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .score-board span {
+            font-size: 28px;
+            color: #C86446;
+            display: block;
+            font-weight: 800;
+        }
+
+        /* Rodapé Obrigatório */
+        .footer-note {
+            font-size: 10px;
+            color: #888;
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            right: 20px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        /* Toast Notification */
+        #toast {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50px);
+            background: #2E5A44;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 100;
+            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Notificação Flutuante -->
+        <div id="toast">Copiado para a área de transferência!</div>
+
+        <!-- Tela Inicial -->
+        <div id="start-screen" class="screen">
+            <div class="brand">🐾 Patas & Cia 🐾</div>
+            <h1>Snack Dash</h1>
+            <p style="color: #C86446; font-weight: 700; margin-bottom: 10px;">Escolha Saudável</p>
+            <p>Ajude o Nico a coletar os petiscos naturais e desviar das rações ultraprocessadas!</p>
+            <button class="btn" id="start-btn">JOGAR</button>
+            <div style="font-size: 12px; color: #666; margin-top: 15px;">
+                💡 Arraste para os lados ou use as setas do teclado
+            </div>
+            <div class="footer-note">Jogo promocional fictício, criado com auxílio de IA generativa para fins educacionais.</div>
+        </div>
+
+        <!-- Canvas do Jogo -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Tela Final / Advergame -->
+        <div id="game-over-screen" class="screen hidden">
+            <div class="brand">🐾 Patas & Cia 🐾</div>
+            <h1 id="end-title">Tutor Consciente!</h1>
+            
+            <div class="score-board">
+                Sua Pontuação Final:
+                <span id="final-score">0</span>
+            </div>
+
+            <div class="coupon-card">
+                <p style="margin-bottom: 4px; font-size: 13px; color: #2E5A44;">Seu Cupom Especial:</p>
+                <div class="coupon-code" id="coupon-text">PETISCONATURAL15</div>
+                <p style="font-size: 11px; margin-bottom: 0; color: #555;">Mostre no site ou loja Patas & Cia e ganhe 15% de desconto na primeira compra da nova linha natural!</p>
+            </div>
+
+            <button class="btn" id="copy-btn">COPIAR CUPOM</button>
+            <button class="btn btn-secondary" id="restart-btn" style="margin-bottom: 30px;">JOGAR DE NOVO</button>
+
+            <div class="footer-note">Jogo promocional fictício, criado com auxílio de IA generativa para fins educacionais.</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Ajuste de Tamanho do Canvas Mantendo Proporção Mobile
+        function resize() {
+            const container = document.getElementById('game-container');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Variáveis de Jogo
+        const GAME_DURATION = 45; // segundos
+        let gameState = 'START'; // START, PLAYING, GAMEOVER
+        let score = 0;
+        let timeLeft = GAME_DURATION;
+        let gameTimer = null;
+        let spawnTimer = null;
+        let gameSpeed = 5;
+        let entities = [];
+        let particles = [];
+        
+        // Estado do Nico (Gato)
+        let lanes = [canvas.width * 0.25, canvas.width * 0.5, canvas.width * 0.75];
+        let currentLane = 1; // 0: Esquerda, 1: Centro, 2: Direita
+        let nicoX = lanes[currentLane];
+        let targetX = lanes[currentLane];
+        let nicoY = canvas.height - 140;
+        let isSuperMode = false;
+        let superModeTimer = null;
+        let stumbleTimer = 0;
+
+        // Controles Touch / Swipe
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        window.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        });
+
+        window.addEventListener('touchend', e => {
+            if (gameState !== 'PLAYING') return;
+            let touchEndX = e.changedTouches[0].clientX;
+            let touchEndY = e.changedTouches[0].clientY;
+            let diffX = touchEndX - touchStartX;
+            let diffY = touchEndY - touchStartY;
+
+            // Checar se foi um swipe horizontal predominante
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
+                if (diffX > 0 && currentLane < 2) {
+                    currentLane++;
+                } else if (diffX < 0 && currentLane > 0) {
+                    currentLane--;
+                }
+            } else if (Math.abs(diffX) <= 30 && Math.abs(diffY) <= 30) {
+                // Toque simples baseado em qual terço da tela foi tocado
+                if (touchEndX < canvas.width * 0.33) currentLane = 0;
+                else if (touchEndX < canvas.width * 0.66) currentLane = 1;
+                else currentLane = 2;
+            }
+            targetX = lanes[currentLane];
+        });
+
+        // Controles de Mouse (para testes no PC)
+        window.addEventListener('click', e => {
+            if (gameState !== 'PLAYING') return;
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            if (clickX < canvas.width / 3) currentLane = 0;
+            else if (clickX < (canvas.width / 3) * 2) currentLane = 1;
+            else currentLane = 2;
+            targetX = lanes[currentLane];
+        });
+
+        // Controles de Teclado
+        window.addEventListener('keydown', e => {
+            if (gameState !== 'PLAYING') return;
+            if ((e.key === 'ArrowLeft' || e.key === 'a') && currentLane > 0) {
+                currentLane--;
+            } else if ((e.key === 'ArrowRight' || e.key === 'd') && currentLane < 2) {
+                currentLane++;
+            }
+            targetX = lanes[currentLane];
+        });
+
+        // Elementos de UI
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const finalScoreEl = document.getElementById('final-score');
+        const toast = document.getElementById('toast');
+
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', startGame);
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText('PETISCONATURAL15').then(() => {
+                showToast('Cupom copiado com sucesso!');
+            }).catch(() => {
+                showToast('Erro ao copiar cupom');
+            });
+        });
+
+        function showToast(msg) {
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function startGame() {
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            
+            // Resetar Variáveis
+            score = 0;
+            timeLeft = GAME_DURATION;
+            currentLane = 1;
+            lanes = [canvas.width * 0.25, canvas.width * 0.5, canvas.width * 0.75];
+            nicoX = lanes[currentLane];
+            targetX = lanes[currentLane];
+            entities = [];
+            particles = [];
+            isSuperMode = false;
+            gameSpeed = 6;
+            stumbleTimer = 0;
+            
+            if (superModeTimer) clearTimeout(superModeTimer);
+            if (gameTimer) clearInterval(gameTimer);
+            if (spawnTimer) clearInterval(spawnTimer);
+
+            gameState = 'PLAYING';
+
+            // Cronômetro Regressivo
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            // Gerador de Itens
+            spawnTimer = setInterval(spawnEntity, 800);
+        }
+
+        function endGame() {
+            gameState = 'GAMEOVER';
+            clearInterval(gameTimer);
+            clearInterval(spawnTimer);
+            if (superModeTimer) clearTimeout(superModeTimer);
+            
+            finalScoreEl.innerText = score;
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        // Sistema de Entidades (Itens e Obstáculos)
+        function spawnEntity() {
+            if (gameState !== 'PLAYING') return;
+            const laneIndex = Math.floor(Math.random() * 3);
+            
+            // Definição de Tipos:
+            // 0, 1: Petisco Natural (+100)
+            // 2: Super Estrela (+250 e Super Vitalidade)
+            // 3, 4: Ultraprocessado / Obstáculo (-50)
+            let rand = Math.random();
+            let type = 'natural';
+            if (rand < 0.15) {
+                type = 'super';
+            } else if (rand < 0.55) {
+                type = 'obstacle';
+            }
+
+            entities.push({
+                lane: laneIndex,
+                x: lanes[laneIndex],
+                y: -50,
+                type: type,
+                size: 35,
+                rotation: Math.random() * Math.PI
+            });
+        }
+
+        // Criação de Partículas de Efeito
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 8; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    color: color,
+                    life: 30
+                });
+            }
+        }
+
+        // Desenhar Cenário
+        function drawBackground() {
+            // Gradiente do Parque (Cores da Marca)
+            let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#2E5A44');
+            grad.addColorStop(0.4, '#F5EBE1');
+            grad.addColorStop(1, '#E5A93C');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Faixas da Pista
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([15, 15]);
+            
+            // Linhas divisorias
+            let lineX1 = canvas.width * 0.375;
+            let lineX2 = canvas.width * 0.625;
+
+            ctx.beginPath();
+            ctx.moveTo(lineX1, 0);
+            ctx.lineTo(lineX1, canvas.height);
+            ctx.moveTo(lineX2, 0);
+            ctx.lineTo(lineX2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]); // Resetar tracejado
+
+            // Detalhe de grama nas bordas
+            ctx.fillStyle = '#2E5A44';
+            ctx.fillRect(0, 0, 12, canvas.height);
+            ctx.fillRect(canvas.width - 12, 0, 12, canvas.height);
+        }
+
+        // Desenhar o Mascote Nico (Gato Laranja Atlètico)
+        function drawNico(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            if (stumbleTimer > 0) {
+                ctx.rotate(Math.sin(stumbleTimer * 0.5) * 0.3);
+            }
+
+            // Aura do Modo Super Vitalidade
+            if (isSuperMode) {
+                ctx.beginPath();
+                ctx.arc(0, 0, 50 + Math.sin(Date.now() * 0.02) * 5, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(229, 169, 60, 0.4)';
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#E5A93C';
+                ctx.stroke();
+            }
+
+            // Sombra no chão
+            ctx.beginPath();
+            ctx.ellipse(0, 35, 22, 8, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fill();
+
+            // Corpo do Gato (Laranja Vibrante)
+            ctx.fillStyle = '#E07A5F';
+            ctx.beginPath();
+            ctx.ellipse(0, 5, 22, 28, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Patas Brancas
+            ctx.fillStyle = '#FFFFFF';
+            // Patas dianteiras
+            ctx.beginPath();
+            ctx.arc(-10, 22, 7, 0, Math.PI * 2);
+            ctx.arc(10, 22, 7, 0, Math.PI * 2);
+            ctx.fill();
+            // Patas traseiras
+            ctx.beginPath();
+            ctx.arc(-14, -5, 6, 0, Math.PI * 2);
+            ctx.arc(14, -5, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cabeça
+            ctx.fillStyle = '#E07A5F';
+            ctx.beginPath();
+            ctx.arc(0, -22, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Orelhas
+            ctx.beginPath();
+            ctx.moveTo(-16, -32);
+            ctx.lineTo(-22, -45);
+            ctx.lineTo(-8, -36);
+            ctx.closePath();
+            ctx.moveTo(16, -32);
+            ctx.lineTo(22, -45);
+            ctx.lineTo(8, -36);
+            ctx.closePath();
+            ctx.fill();
+
+            // Interior das Orelhas (Rosa claro)
+            ctx.fillStyle = '#F2CC8F';
+            ctx.beginPath();
+            ctx.moveTo(-14, -34);
+            ctx.lineTo(-18, -41);
+            ctx.lineTo(-9, -36);
+            ctx.closePath();
+            ctx.moveTo(14, -34);
+            ctx.lineTo(18, -41);
+            ctx.lineTo(9, -36);
+            ctx.closePath();
+            ctx.fill();
+
+            // Olhos Verde Botânico (#2E5A44)
+            ctx.fillStyle = '#2E5A44';
+            ctx.beginPath();
+            ctx.arc(-7, -24, 3.5, 0, Math.PI * 2);
+            ctx.arc(7, -24, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Brilho nos olhos
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(-8, -26, 1.5, 1.5);
+            ctx.fillRect(6, -26, 1.5, 1.5);
+
+            // Focinho e Bigodes
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(0, -16, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#2E5A44';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(-3, -15); ctx.lineTo(-12, -14);
+            ctx.moveTo(3, -15); ctx.lineTo(12, -14);
+            ctx.stroke();
+
+            // Bandana Verde Botânico (#2E5A44) com ícone de folha amarela (#E5A93C)
+            ctx.fillStyle = '#2E5A44';
+            ctx.beginPath();
+            ctx.ellipse(0, -11, 16, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Ícone da Folha Amarela na Bandana
+            ctx.fillStyle = '#E5A93C';
+            ctx.beginPath();
+            ctx.ellipse(0, -11, 4, 2.5, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // Desenhar Entidades (Petiscos e Obstáculos)
+        function drawEntity(ent) {
+            ctx.save();
+            ctx.translate(ent.x, ent.y);
+
+            if (ent.type === 'natural') {
+                // Petisco Natural Patas & Cia (Ossinho / Biscoito Dourado com brilho)
+                ctx.shadowColor = '#E5A93C';
+                ctx.shadowBlur = 12;
+                
+                ctx.fillStyle = '#E5A93C';
+                ctx.beginPath();
+                ctx.roundRect(-16, -10, 32, 20, 8);
+                ctx.fill();
+                
+                // Detalhe do osso
+                ctx.fillStyle = '#FFF8E8';
+                ctx.beginPath();
+                ctx.arc(-12, -4, 4, 0, Math.PI * 2);
+                ctx.arc(-12, 4, 4, 0, Math.PI * 2);
+                ctx.arc(12, -4, 4, 0, Math.PI * 2);
+                ctx.arc(12, 4, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+            } else if (ent.type === 'super') {
+                // Super Petisco Estrela (+250)
+                ctx.shadowColor = '#FFF';
+                ctx.shadowBlur = 15;
+                ctx.rotate(Date.now() * 0.005);
+                
+                ctx.fillStyle = '#FFD166';
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * 20, -Math.sin((18 + i * 72) * Math.PI / 180) * 20);
+                    ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * 10, -Math.sin((54 + i * 72) * Math.PI / 180) * 10);
+                }
+                ctx.closePath();
+                ctx.fill();
+
+            } else if (ent.type === 'obstacle') {
+                // Ração Ultraprocessada / Corante (Terracota escura / Lata industrial perigosa)
+                ctx.shadowColor = '#C86446';
+                ctx.shadowBlur = 5;
+
+                ctx.fillStyle = '#C86446';
+                ctx.beginPath();
+                ctx.roundRect(-16, -16, 32, 32, 6);
+                ctx.fill();
+
+                // Ícone de alerta (X)
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(-8, -8); ctx.lineTo(8, 8);
+                ctx.moveTo(8, -8); ctx.lineTo(-8, 8);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        // Desenhar HUD Superior
+        function drawHUD() {
+            // Caixa de Informações
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.roundRect(15, 15, canvas.width - 30, 65, 12);
+            ctx.fill();
+
+            // Placar de Pontos
+            ctx.fillStyle = '#2E5A44';
+            ctx.font = 'bold 13px sans-serif';
+            ctx.fillText('PONTOS', 30, 37);
+            ctx.fillStyle = '#C86446';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.fillText(score, 30, 58);
+
+            // Cronômetro
+            ctx.fillStyle = '#2E5A44';
+            ctx.font = 'bold 13px sans-serif';
+            ctx.fillText('TEMPO', canvas.width - 95, 37);
+            ctx.fillStyle = timeLeft <= 10 ? '#C86446' : '#2E5A44';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.fillText(`0:${timeLeft < 10 ? '0' : ''}${timeLeft}`, canvas.width - 95, 58);
+
+            // Indicador de Super Vitalidade Ativa
+            if (isSuperMode) {
+                ctx.fillStyle = '#E5A93C';
+                ctx.fillRect(15, 88, canvas.width - 30, 8);
+                ctx.fillStyle = '#2E5A44';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.fillText('⚡ MODO SUPER VITALIDADE ATIVO! (Pontos em Dobro)', 25, 110);
+            }
+        }
+
+        // Loop Principal do Jogo
+        function update() {
+            if (gameState !== 'PLAYING') return;
+
+            // Movimento suave do Nico entre as faixas
+            nicoX += (targetX - nicoX) * 0.2;
+
+            if (stumbleTimer > 0) stumbleTimer--;
+
+            // Atualizar Entidades
+            for (let i = entities.length - 1; i >= 0; i--) {
+                let ent = entities[i];
+                ent.y += gameSpeed;
+
+                // Teste de Colisão (Hitbox circular simples)
+                let dx = nicoX - ent.x;
+                let dy = nicoY - ent.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 40) {
+                    // Colisão Detectada!
+                    if (ent.type === 'natural') {
+                        let pts = isSuperMode ? 200 : 100;
+                        score += pts;
+                        createParticles(ent.x, ent.y, '#E5A93C');
+                    } else if (ent.type === 'super') {
+                        score += 250;
+                        isSuperMode = true;
+                        createParticles(ent.x, ent.y, '#FFD166');
+                        if (superModeTimer) clearTimeout(superModeTimer);
+                        superModeTimer = setTimeout(() => {
+                            isSuperMode = false;
+                        }, 5000);
+                    } else if (ent.type === 'obstacle') {
+                        score = Math.max(0, score - 50);
+                        stumbleTimer = 20; // Duração do tropeço em frames
+                        createParticles(ent.x, ent.y, '#C86446');
+                    }
+                    entities.splice(i, 1);
+                    continue;
+                }
+
+                // Remover itens que passaram da tela
+                if (ent.y > canvas.height + 50) {
+                    entities.splice(i, 1);
+                }
+            }
+
+            // Atualizar Partículas
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawBackground();
+
+            // Desenhar Entidades
+            entities.forEach(drawEntity);
+
+            // Desenhar Partículas
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Desenhar Nico
+            drawNico(nicoX, nicoY);
+
+            // Desenhar HUD
+            drawHUD();
+        }
+
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Iniciar loop de animação de renderização
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
